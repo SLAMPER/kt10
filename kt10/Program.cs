@@ -1,123 +1,92 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace kt10
 {
-    public interface IEntity
+    public interface IClonable<T> where T : class
     {
-        int Id { get; set; }
+        T Clone();
     }
 
-    public interface IRepository<T> where T : IEntity
+    public class Point : IClonable<Point>
     {
-        void Add(T item);
-        void Delete(T item);
-        T FindById(int id);
-        IEnumerable<T> GetAll();
-    }
+        public int X { get; set; }
+        public int Y { get; set; }
 
-    public class Product : IEntity
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public decimal Price { get; set; }
+        public Point(Point other)
+        {
+            X = other.X;
+            Y = other.Y;
+        }
+
+        public Point(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        public Point Clone()
+        {
+            return new Point(this);
+        }
 
         public string GetInfo()
         {
-            return $"Product: {Id}, {Name}, ${Price}";
+            return $"Point({X}, {Y})";
         }
     }
 
-    public class Customer : IEntity
+    public class Rectangle : IClonable<Rectangle>
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Address { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+
+        public Rectangle(Rectangle other)
+        {
+            Width = other.Width;
+            Height = other.Height;
+        }
+
+        public Rectangle(int width, int height)
+        {
+            Width = width;
+            Height = height;
+        }
+
+        public Rectangle Clone()
+        {
+            return new Rectangle(this);
+        }
 
         public string GetInfo()
         {
-            return $"Customer: {Id}, {Name}, {Address}";
-        }
-    }
-
-    public class ProductRepository : IRepository<Product>
-    {
-        private List<Product> products = new List<Product>();
-
-        public void Add(Product item)
-        {
-            products.Add(item);
-        }
-
-        public void Delete(Product item)
-        {
-            products.Remove(item);
-        }
-
-        public Product FindById(int id)
-        {
-            return products.Find(p => p.Id == id);
-        }
-
-        public IEnumerable<Product> GetAll()
-        {
-            return products;
-        }
-    }
-
-    public class CustomerRepository : IRepository<Customer>
-    {
-        private List<Customer> customers = new List<Customer>();
-
-        public void Add(Customer item)
-        {
-            customers.Add(item);
-        }
-
-        public void Delete(Customer item)
-        {
-            customers.Remove(item);
-        }
-
-        public Customer FindById(int id)
-        {
-            return customers.Find(c => c.Id == id);
-        }
-
-        public IEnumerable<Customer> GetAll()
-        {
-            return customers;
+            return $"Rectangle({Width}x{Height})";
         }
     }
 
     class Program
     {
+        public static T CreateClone<T>(T obj) where T : class, IClonable<T>
+        {
+            return obj.Clone();
+        }
+
         static void Main()
         {
-            ProductRepository productRepo = new ProductRepository();
+            Point point1 = new Point(5, 10);
+            Point point2 = CreateClone(point1);
 
-            productRepo.Add(new Product { Id = 1, Name = "1", Price = 5 });
-            productRepo.Add(new Product { Id = 2, Name = "2", Price = 25 });
-            productRepo.Add(new Product { Id = 3, Name = "3", Price = 125 });
+            Console.WriteLine("original " + point1.GetInfo());
+            Console.WriteLine("clone " + point2.GetInfo());
+            Console.WriteLine("different " + (point1 != point2));
 
-            Console.WriteLine("products:");
-            foreach (var product in productRepo.GetAll())
-            {
-                Console.WriteLine(product.GetInfo());
-            }
+            Console.WriteLine();
 
-            Console.WriteLine(productRepo.FindById(2).GetInfo());
+            Rectangle rect1 = new Rectangle(25, 5);
+            Rectangle rect2 = CreateClone(rect1);
 
-            CustomerRepository customerRepo = new CustomerRepository();
-
-            customerRepo.Add(new Customer { Id = 1, Name = "max", Address = "1" });
-            customerRepo.Add(new Customer { Id = 2, Name = "maxi", Address = "2" });
-
-            Console.WriteLine("\nAll customers ");
-            foreach (var customer in customerRepo.GetAll())
-            {
-                Console.WriteLine(customer.GetInfo());
-            }
+            Console.WriteLine("original " + rect1.GetInfo());
+            Console.WriteLine("clone " + rect2.GetInfo());
+            Console.WriteLine("different " + (rect1 != rect2));
 
             Console.ReadLine();
         }
