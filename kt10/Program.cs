@@ -2,91 +2,86 @@
 
 namespace kt10
 {
-    public interface IClonable<T> where T : class
+    public interface IComparable<T>
     {
-        T Clone();
+        int CompareTo(T other);
     }
 
-    public class Point : IClonable<Point>
+    public struct ComplexNumber : IComparable<ComplexNumber>
     {
-        public int X { get; set; }
-        public int Y { get; set; }
+        public double Real { get; set; }
+        public double Imaginary { get; set; }
 
-        public Point(Point other)
+        public ComplexNumber(double real, double imaginary)
         {
-            X = other.X;
-            Y = other.Y;
+            Real = real;
+            Imaginary = imaginary;
         }
 
-        public Point(int x, int y)
+        public int CompareTo(ComplexNumber other)
         {
-            X = x;
-            Y = y;
-        }
+            double magnitude1 = Math.Sqrt(Real * Real + Imaginary * Imaginary);
+            double magnitude2 = Math.Sqrt(other.Real * other.Real + other.Imaginary * other.Imaginary);
 
-        public Point Clone()
-        {
-            return new Point(this);
+            if (magnitude1 < magnitude2) return -1;
+            if (magnitude1 > magnitude2) return 1;
+            return 0;
         }
 
         public string GetInfo()
         {
-            return $"Point({X}, {Y})";
+            return $"{Real} + {Imaginary}i";
         }
     }
 
-    public class Rectangle : IClonable<Rectangle>
+    public struct RationalNumber : IComparable<RationalNumber>
     {
-        public int Width { get; set; }
-        public int Height { get; set; }
+        public int Numerator { get; set; }
+        public int Denominator { get; set; }
 
-        public Rectangle(Rectangle other)
+        public RationalNumber(int numerator, int denominator)
         {
-            Width = other.Width;
-            Height = other.Height;
+            Numerator = numerator;
+            Denominator = denominator;
         }
 
-        public Rectangle(int width, int height)
+        public int CompareTo(RationalNumber other)
         {
-            Width = width;
-            Height = height;
-        }
+            double value1 = (double)Numerator / Denominator;
+            double value2 = (double)other.Numerator / other.Denominator;
 
-        public Rectangle Clone()
-        {
-            return new Rectangle(this);
+            if (value1 < value2) return -1;
+            if (value1 > value2) return 1;
+            return 0;
         }
 
         public string GetInfo()
         {
-            return $"Rectangle({Width}x{Height})";
+            return $"{Numerator}/{Denominator}";
         }
     }
 
     class Program
     {
-        public static T CreateClone<T>(T obj) where T : class, IClonable<T>
-        {
-            return obj.Clone();
-        }
-
         static void Main()
         {
-            Point point1 = new Point(5, 10);
-            Point point2 = CreateClone(point1);
+            ComplexNumber complex1 = new ComplexNumber(3, 4);
+            ComplexNumber complex2 = new ComplexNumber(1, 2);
 
-            Console.WriteLine("original " + point1.GetInfo());
-            Console.WriteLine("clone " + point2.GetInfo());
-            Console.WriteLine("different " + (point1 != point2));
+            Console.WriteLine("complex Numbers");
+            Console.WriteLine("number 1 " + complex1.GetInfo());
+            Console.WriteLine("number 2 " + complex2.GetInfo());
+            Console.WriteLine("compare result " + complex1.CompareTo(complex2));
 
             Console.WriteLine();
 
-            Rectangle rect1 = new Rectangle(25, 5);
-            Rectangle rect2 = CreateClone(rect1);
+            RationalNumber rational1 = new RationalNumber(3, 4);
+            RationalNumber rational2 = new RationalNumber(1, 2);
 
-            Console.WriteLine("original " + rect1.GetInfo());
-            Console.WriteLine("clone " + rect2.GetInfo());
-            Console.WriteLine("different " + (rect1 != rect2));
+            Console.WriteLine("rational Numbers:");
+            Console.WriteLine("number 1 " + rational1.GetInfo());
+            Console.WriteLine("number 2 " + rational2.GetInfo());
+            Console.WriteLine("compare " + rational1.CompareTo(rational2));
 
             Console.ReadLine();
         }
